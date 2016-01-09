@@ -2,9 +2,11 @@ package processors;
 
 import java.util.List;
 
+import reparator.AppTest;
 import spoon.processing.AbstractManualProcessor;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.visitor.filter.TypeFilter;
+import util.TestAnalyser;
 
 public class ClassProcessor extends AbstractManualProcessor{
 
@@ -12,9 +14,20 @@ public class ClassProcessor extends AbstractManualProcessor{
 	public void process() {
 		//Get all classes
 		List<CtClass> classes = getFactory().Package().getRootPackage().getElements(new TypeFilter(CtClass.class));
-		  for(CtClass cls: classes){
-			  System.out.println(cls.getSimpleName().toString());
+		String root= getFactory().Package().getRootPackage().getQualifiedName();
+		for(CtClass cls: classes){
+			
+			  run(cls,root);			  
 		  }		
+	}
+	
+	private void run(CtClass className,String root){
+		//run test
+		TestAnalyser test = new TestAnalyser();
+		test.runTest(AppTest.class);
+		System.out.println(className.getSimpleName().toString());
+			
+	
 	}
 
 }
