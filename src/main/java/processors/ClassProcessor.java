@@ -2,11 +2,11 @@ package processors;
 
 import java.util.List;
 
+import engine.TestAnalyser;
 import reparator.AppTest;
 import spoon.processing.AbstractManualProcessor;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.visitor.filter.TypeFilter;
-import util.TestAnalyser;
 
 public class ClassProcessor extends AbstractManualProcessor{
 
