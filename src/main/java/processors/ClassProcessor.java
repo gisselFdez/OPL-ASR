@@ -12,7 +12,7 @@ public class ClassProcessor extends AbstractManualProcessor{
 
 	@Override
 	public void process() {
-		//Get all classes
+		// Get all classes
 		List<CtClass> classes = getFactory().Package().getRootPackage().getElements(new TypeFilter(CtClass.class));
 		String root= getFactory().Package().getRootPackage().getQualifiedName();
 		for(CtClass cls: classes){
