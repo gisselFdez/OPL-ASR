@@ -1,13 +1,15 @@
 package reparator;
 
 import java.io.File;
-import processors.ClassProcessor;
-import spoon.Launcher;
+
 import engine.Compiler;
 
 public class App {
-
-
+  
+//  public static final String SOURCES_PATH = "C:\\Users\\Pauline\\Documents\\M2IAGL\\OPL\\IntroClassJava\\dataset\\checksum\\6\\003";
+  public static final String SOURCES_PATH = "C:\\Users\\AnaGissel\\Documents\\MASTER\\OPL\\Project3\\IntroClassJava\\dataset";
+  public static final String CHECKSUM_06_PATH = "C:\\Users\\AnaGissel\\Documents\\MASTER\\OPL\\Project3\\IntroClassJava\\dataset\\checksum\\6\\003";
+  
 	public static void main(String[] args) {
 		//To call only ONE project		
 		/*String sourcesPath = "C:\\Users\\AnaGissel\\Documents\\MASTER\\OPL\\Project3\\IntroClassJava\\dataset\\checksum\\1\\003\\src";		
@@ -17,10 +19,8 @@ public class App {
 		spoon.run(new String[]{"-i",sourcesPath,"-x"});*/
 		
 		//To call EVERY project on path
-		String sourcesPath = "C:\\Users\\AnaGissel\\Documents\\MASTER\\OPL\\Project3\\IntroClassJava\\dataset";
-		sourcesPath = "C:\\Users\\AnaGissel\\Documents\\MASTER\\OPL\\Project3\\IntroClassJava\\dataset\\checksum\\6\\003";
 		App reparator = new App();
-		reparator.getAllProjects(new File(sourcesPath));
+		reparator.getAllProjects(new File(CHECKSUM_06_PATH));
 	}
 	
 	/**
