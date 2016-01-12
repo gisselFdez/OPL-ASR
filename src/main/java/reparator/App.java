@@ -2,9 +2,7 @@ package reparator;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import engine.Compiler;
 import processors.ClassProcessor;
@@ -16,9 +14,8 @@ public class App {
   // public static final String SOURCES_PATH = "C:\\Users\\Pauline\\Documents\\M2IAGL\\OPL\\IntroClassJava\\dataset\\checksum\\6\\003";
   // public static final String SOURCES_PATH = "C:\\Users\\AnaGissel\\Documents\\MASTER\\OPL\\Project3\\IntroClassJava\\dataset";
   public static final String CHECKSUM_06_PATH = "C:\\Users\\AnaGissel\\Documents\\MASTER\\OPL\\Project3\\IntroClassJava\\dataset\\checksum\\6\\003";
-  public static final Map<String, List<String>> MAP_STATIQUE = initMapStatique();
+  public static final List<String> STATIC_CLASSES_LIST = initStaticList();
 
-  
   public static void main(String[] args) {
     System.out.println(">> Start the App.");
 
@@ -56,7 +53,7 @@ public class App {
             // Call the spoon processor
             System.out.println(">> Launch the ClassProcessor.");
             final Launcher spoon = new Launcher();
-            spoon.addProcessor(new ClassProcessor(new File(SOURCES_PATH), MAP_STATIQUE));
+            spoon.addProcessor(new ClassProcessor(new File(SOURCES_PATH), STATIC_CLASSES_LIST));
             spoon.run(new String[] {"-i", listFile[i].getPath(), "-x"});
 
             break;
@@ -68,14 +65,10 @@ public class App {
 
   /* ******************************************* BUILDS ******************************************* */
 
-  private static Map<String, List<String>> initMapStatique() {
-    Map<String, List<String>> map = new HashMap<>();
-
-    List<String> methods = new ArrayList<String>();
-    methods.add("getMessage");
-
-    map.put("example.Example", methods);
-    return map;
+  private static List<String> initStaticList() {
+    List<String> classes = new ArrayList<String>();
+    classes.add("example.Example");
+    return classes;
   }
 
 }
