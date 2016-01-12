@@ -10,6 +10,13 @@ public enum Operators {
   AND("&&"), // Logical operators
   OR("||");
 
+  private String code;
+  
   Operators(String op) {
+    this.code = op;
+  }
+  
+  public String get() {
+    return this.code;
   }
 }

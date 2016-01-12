@@ -1,22 +1,23 @@
 package processors;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 import engine.TestAnalyser;
 import reparator.AppTest;
 import spoon.processing.AbstractManualProcessor;
+import spoon.reflect.code.CtCodeElement;
 import spoon.reflect.code.CtStatement;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.visitor.filter.TypeFilter;
+import spoon.support.reflect.code.CtIfImpl;
 import util.Operators;
 
 public class ClassProcessor extends AbstractManualProcessor {
 
-  private ConditionProcessor conditionProcessor; // Processor which make the statement changes
   private List<String> classesToModify; // list containing classes where we have to change conditional statements
   private File sourcesPath;
   private List<CtClass<?>> allClasses;
@@ -32,18 +33,24 @@ public class ClassProcessor extends AbstractManualProcessor {
     super();
     this.classesToModify = classesToModify;
     this.sourcesPath = sourcesPath;
-    this.conditionProcessor = new ConditionProcessor();
-    this.allClasses = getFactory().Package().getRootPackage().getElements(new TypeFilter(CtClass.class));
+    this.allClasses = new ArrayList<CtClass<?>>();
+  }
+
+  public void setAllClasses(List<CtClass<?>> allClasses) {
+    this.allClasses = allClasses;
   }
 
   @Override
   public void process() {
+    // Get all classes
+    this.setAllClasses(getFactory().Package().getRootPackage().getElements(new TypeFilter(CtClass.class)));
+
     if (this.allClasses.isEmpty()) {
       System.out.println(">> Any classes found.");
     }
 
     // Run test for each class
-    this.allClasses.stream().forEach(c -> runTest(c));
+    // this.allClasses.stream().forEach(c -> runTest(c));
     // Run analyze on the sources
     runAnalyze(this.sourcesPath, this.classesToModify);
   }
@@ -99,9 +106,7 @@ public class ClassProcessor extends AbstractManualProcessor {
     // Identfy statements which contains at least an operator and contains a if condition
     for (CtStatement statement : methodToRepair.getBody().getStatements()) {
       if (containsOperator(statement) && isACondition(statement)) {
-        System.out.println(">> analyzeMethod() found the statement " + statement.getSignature());
-        // Call to ConditionProcessor to replace the conditional statement
-        conditionProcessor.process();
+        System.out.println(">> analyzeMethod() found the statement with conditional structure.");
       }
     }
   }
@@ -111,16 +116,20 @@ public class ClassProcessor extends AbstractManualProcessor {
    * @param statement the statement to check
    * @return <code>true</code> if contains at least an operator, <code>false</code> else
    */
-  private Boolean containsOperator(CtStatement statement) {
-    String st = statement.getLabel().toLowerCase();
+  private Boolean containsOperator(CtCodeElement codeElement) {
+    if (codeElement instanceof CtIfImpl) {
+      CtIfImpl ifStatement = (CtIfImpl) codeElement;
+      if (ifStatement.getCondition() != null) {
+        // Pattern construction
+        String p = Operators.EQUAL.get() + "|" + Operators.NOT_EQUAL.get()
+          + "|" + Operators.GREATER.get() + "|" + Operators.GREATER_EQUAL.get()
+          + "|" + Operators.LESS.get() + "|" + Operators.LESS_EQUAL.get();
 
-    // Pattern construction
-    String p = Operators.EQUAL.name() + "|" + Operators.NOT_EQUAL.name()
-      + "|" + Operators.GREATER.name() + "|" + Operators.GREATER_EQUAL.name()
-      + "|" + Operators.LESS.name() + "|" + Operators.LESS_EQUAL.name();
-
-    Pattern pattern = Pattern.compile(p);
-    return pattern.matcher(st).find();
+        Pattern pattern = Pattern.compile(p);
+        return pattern.matcher(ifStatement.getCondition().toString()).find();
+      }
+    }
+    return false;
   }
 
   /**
@@ -128,8 +137,7 @@ public class ClassProcessor extends AbstractManualProcessor {
    * @param statement the statement to check
    * @return <code>true</code> if the statement is a conditional structure, <code>false</code> else
    */
-  private Boolean isACondition(CtStatement statement) {
-    String st = statement.getLabel().toLowerCase();
-    return st.contains(IF_CONDITION);
+  private Boolean isACondition(CtCodeElement codeElement) {
+    return (codeElement instanceof CtIfImpl);
   }
 }

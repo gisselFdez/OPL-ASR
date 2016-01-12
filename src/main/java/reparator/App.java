@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import engine.Compiler;
 import processors.ClassProcessor;
 import spoon.Launcher;
 
@@ -47,8 +46,8 @@ public class App {
           } else {
             System.out.println("File: " + listFile[i].getPath());
             // Launch the compilation step of the project
-            Compiler compiler = new Compiler();
-            compiler.compileProject(listFile[i].getPath());
+//            Compiler compiler = new Compiler();
+//            compiler.compileProject(listFile[i].getPath());
 
             // Call the spoon processor
             System.out.println(">> Launch the ClassProcessor.");
@@ -67,7 +66,7 @@ public class App {
 
   private static List<String> initStaticList() {
     List<String> classes = new ArrayList<String>();
-    classes.add("example.Example");
+    classes.add("Example");
     return classes;
   }
 
