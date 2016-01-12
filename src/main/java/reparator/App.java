@@ -54,6 +54,7 @@ public class App {
             compiler.compileProject(listFile[i].getPath());
 
             // Call the spoon processor
+            System.out.println(">> Launch the ClassProcessor.");
             final Launcher spoon = new Launcher();
             spoon.addProcessor(new ClassProcessor(new File(SOURCES_PATH), MAP_STATIQUE));
             spoon.run(new String[] {"-i", listFile[i].getPath(), "-x"});

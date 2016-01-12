@@ -17,7 +17,7 @@ import util.Operators;
 public class ClassProcessor extends AbstractManualProcessor {
 
   private ConditionProcessor conditionProcessor; // Processor which make the statement changes
-  private Map<String, List<String>> map; // map containing bugged methods with their classname
+  private List<String> classesToModify; // list containing classes where we have to change conditional statements
   private File sourcesPath;
   private List<CtClass<?>> allClasses;
 
@@ -25,12 +25,12 @@ public class ClassProcessor extends AbstractManualProcessor {
 
   /**
    * Constructor of the ClassProcessor
-   * @param map the map containing bugged methods with their classname
+   * @param classesToModify the list of classes where conditional statements have to be changed
    * @param sourcesPath the sources path
    */
-  public ClassProcessor(File sourcesPath, Map<String, List<String>> map) {
+  public ClassProcessor(File sourcesPath, List<String> classesToModify) {
     super();
-    this.map = map;
+    this.classesToModify = classesToModify;
     this.sourcesPath = sourcesPath;
     this.conditionProcessor = new ConditionProcessor();
     this.allClasses = getFactory().Package().getRootPackage().getElements(new TypeFilter(CtClass.class));
@@ -45,7 +45,7 @@ public class ClassProcessor extends AbstractManualProcessor {
     // Run test for each class
     this.allClasses.stream().forEach(c -> runTest(c));
     // Run analyze on the sources
-    runAnalyze(this.sourcesPath, this.map);
+    runAnalyze(this.sourcesPath, this.classesToModify);
   }
 
   /**
@@ -62,49 +62,44 @@ public class ClassProcessor extends AbstractManualProcessor {
   /**
    * Starts the analyze of code lines to find method to repair
    * @param sourcePath the source code path
-   * @param map the map containing methods to repair with their classname
+   * @param classes the list of classes to modify
    */
-  public void runAnalyze(File sourcePath, Map<String, List<String>> map) {
+  public void runAnalyze(File sourcePath, List<String> classes) {
     // For each class, we fetch the methods to repair
-    for (String classname : map.keySet()) {
+    for (String classname : classes) {
 
       // Get the good CtClass
       for (CtClass<?> cls : this.allClasses) {
         if (cls.getSimpleName().equals(classname)) {
           System.out.println(">> runAnalyze() found the class " + classname);
-          analyzeMethods(cls);
+          analyzeClass(cls);
         }
       }
     }
   }
 
   /**
-   * Analyze the methods to change into the class
+   * Analyze the class to identify which methods have to be changed
    * @param classToRepair the class to be analyzed
    */
-  public void analyzeMethods(CtClass<?> classToRepair) {
-    // For each method to repair into the class
-    for (String methodName : map.get(classToRepair.getSimpleName())) {
-      for (CtMethod<?> method : classToRepair.getMethods()) {
-        if (method.getSimpleName().equals(methodName)) { // we found a CtMethod to repair
-          System.out.println(">> analyzeMethod() found the method " + methodName);
-          analyzeStatements(method);
-        }
-      }
+  public void analyzeClass(CtClass<?> classToRepair) {
+    for (CtMethod<?> method : classToRepair.getMethods()) {
+      System.out.println(">> analyzeClass() found the method " + method.getSignature());
+      analyzeMethod(method);
     }
   }
 
   /**
-   * Analyze the statements to change in the method
+   * Analyze the method to identify conditional statements
    * @param methodToRepair the method to be analyzed
    */
-  public void analyzeStatements(CtMethod<?> methodToRepair) {
+  public void analyzeMethod(CtMethod<?> methodToRepair) {
     System.out.println(">> Method to repair : " + methodToRepair.getSimpleName());
 
     // Identfy statements which contains at least an operator and contains a if condition
     for (CtStatement statement : methodToRepair.getBody().getStatements()) {
       if (containsOperator(statement) && isACondition(statement)) {
-        System.out.println(">> analyzeStatements() found the statement " + statement.getSignature());
+        System.out.println(">> analyzeMethod() found the statement " + statement.getSignature());
         // Call to ConditionProcessor to replace the conditional statement
         conditionProcessor.process();
       }
