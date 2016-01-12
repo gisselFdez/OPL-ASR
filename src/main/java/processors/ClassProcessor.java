@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import engine.TestAnalyser;
+import reparator.App;
 import reparator.AppTest;
 import spoon.processing.AbstractManualProcessor;
 import spoon.reflect.code.CtCodeElement;
@@ -21,8 +22,6 @@ public class ClassProcessor extends AbstractManualProcessor {
   private List<String> classesToModify; // list containing classes where we have to change conditional statements
   private File sourcesPath;
   private List<CtClass<?>> allClasses;
-
-  public static final String IF_CONDITION = "if";
 
   /**
    * Constructor of the ClassProcessor
@@ -66,6 +65,11 @@ public class ClassProcessor extends AbstractManualProcessor {
     System.out.println(className.getSimpleName().toString());
   }
 
+  /*
+   * **********************************************************************************************
+   * ************************************** ANALYZE METHODS ***************************************
+   **********************************************************************************************/
+
   /**
    * Starts the analyze of code lines to find method to repair
    * @param sourcePath the source code path
@@ -106,10 +110,41 @@ public class ClassProcessor extends AbstractManualProcessor {
     // Identfy statements which contains at least an operator and contains a if condition
     for (CtStatement statement : methodToRepair.getBody().getStatements()) {
       if (containsOperator(statement) && isACondition(statement)) {
+        System.out.println(">> Save the current model.");
+        saveModel();
         System.out.println(">> analyzeMethod() found the statement with conditional structure.");
+        replaceIfStatement(statement);
       }
     }
   }
+
+  /*
+   * **********************************************************************************************
+   * ************************************** REPLACE METHODS ***************************************
+   **********************************************************************************************/
+
+  /**
+   * Replace a if statement modifying the comparison operator
+   * @param ifStatement the statement to change
+   */
+  public void replaceIfStatement(CtCodeElement ifStatement) {
+    
+  }
+  
+
+  /*
+   * **********************************************************************************************
+   ****************************************** SAVE METHODS ****************************************
+   **********************************************************************************************/
+  
+  public void saveModel() {
+    App.launcher.prettyprint();
+  }
+  
+  /*
+   * **********************************************************************************************
+   * *************************************** CHECK METHODS ****************************************
+   **********************************************************************************************/
 
   /**
    * Check if the statement contains a comparison or logical operator

@@ -14,6 +14,7 @@ public class App {
   // public static final String SOURCES_PATH = "C:\\Users\\AnaGissel\\Documents\\MASTER\\OPL\\Project3\\IntroClassJava\\dataset";
   public static final String CHECKSUM_06_PATH = "C:\\Users\\AnaGissel\\Documents\\MASTER\\OPL\\Project3\\IntroClassJava\\dataset\\checksum\\6\\003";
   public static final List<String> STATIC_CLASSES_LIST = initStaticList();
+  public static Launcher launcher = new Launcher();
 
   public static void main(String[] args) {
     System.out.println(">> Start the App.");
@@ -46,14 +47,13 @@ public class App {
           } else {
             System.out.println("File: " + listFile[i].getPath());
             // Launch the compilation step of the project
-//            Compiler compiler = new Compiler();
-//            compiler.compileProject(listFile[i].getPath());
+            // Compiler compiler = new Compiler();
+            // compiler.compileProject(listFile[i].getPath());
 
             // Call the spoon processor
             System.out.println(">> Launch the ClassProcessor.");
-            final Launcher spoon = new Launcher();
-            spoon.addProcessor(new ClassProcessor(new File(SOURCES_PATH), STATIC_CLASSES_LIST));
-            spoon.run(new String[] {"-i", listFile[i].getPath(), "-x"});
+            launcher.addProcessor(new ClassProcessor(new File(SOURCES_PATH), STATIC_CLASSES_LIST));
+            launcher.run(new String[] {"-i", listFile[i].getPath(), "-x"});
 
             break;
           }
