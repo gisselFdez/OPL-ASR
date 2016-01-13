@@ -23,10 +23,10 @@ public class ClassProcessor extends AbstractManualProcessor{
 	
 	private void run(CtClass className,String root){
 		//run test
-		TestAnalyser test = new TestAnalyser();
+		/*TestAnalyser test = new TestAnalyser();
 		test.runTest(AppTest.class);
 		System.out.println(className.getSimpleName().toString());
-			
+			*/
 	
 	}
 
