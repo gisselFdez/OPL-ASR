@@ -16,8 +16,20 @@ import util.ClasspathClassLoader;
 import engine.Comparator;
 import engine.Compiler;
 import engine.TestAnalyser;
+import java.util.ArrayList;
+import java.util.List;
+import processors.ClassProcessor;
+import spoon.Launcher;
 
 public class App {
+
+  public static final String SOURCES_PATH = "C:\\Users\\Pauline\\Documents\\M2IAGL\\OPL\\OPL-ASR";
+  // public static final String SOURCES_PATH = "C:\\Users\\Pauline\\Documents\\M2IAGL\\OPL\\IntroClassJava\\dataset\\checksum\\6\\003";
+  // public static final String SOURCES_PATH = "C:\\Users\\AnaGissel\\Documents\\MASTER\\OPL\\Project3\\IntroClassJava\\dataset";
+  public static final String CHECKSUM_06_PATH = "C:\\Users\\AnaGissel\\Documents\\MASTER\\OPL\\Project3\\IntroClassJava\\dataset\\checksum\\6\\003";
+  public static final List<String> STATIC_CLASSES_LIST = initStaticList();
+  public static Launcher launcher = new Launcher();
+
 
 
 	public static void main(String[] args) {
@@ -28,12 +40,11 @@ public class App {
 		spoon.addProcessor(new ClassProcessor());
 		spoon.run(new String[]{"-i",sourcesPath,"-x"});*/
 		
-		//To call EVERY project on path
-		String sourcesPath = "C:\\Users\\AnaGissel\\Documents\\MASTER\\OPL\\Project3\\IntroClassJava\\dataset";
-		sourcesPath = "C:\\Users\\AnaGissel\\Documents\\MASTER\\OPL\\Project3\\IntroClassJava\\dataset\\checksum\\1\\003";
+		//To call EVERY project on path		
 		App reparator = new App();
-		reparator.getAllProjects(new File(sourcesPath));
+		reparator.getAllProjects(new File(SOURCES_PATH));
 	}
+
 	
 	/**
 	 * Launch the spoon processor for every project found in the sourcesPath
@@ -70,6 +81,11 @@ public class App {
                         	Map.Entry e = (Map.Entry)it.next();
                         	System.out.println(e.getKey() + " " + e.getValue());
                         }*/
+                        
+                        // Call the spoon processor
+                        System.out.println(">> Launch the ClassProcessor.");
+                        launcher.addProcessor(new ClassProcessor(new File(SOURCES_PATH), STATIC_CLASSES_LIST));
+                        launcher.run(new String[] {"-i", listFile[i].getPath(), "-x"});
                         break;
                     }                	
                 } 
@@ -80,8 +96,16 @@ public class App {
             /*final Launcher spoon = new Launcher();
 			spoon.addProcessor(new ClassProcessor());
 			spoon.run(new String[]{"-i",listFile[i].getPath(),"-x"});*/
+          }
         }
-	}
-	
-	
+  
+
+  /* ******************************************* BUILDS ******************************************* */
+
+  private static List<String> initStaticList() {
+    List<String> classes = new ArrayList<String>();
+    classes.add("Example");
+    return classes;
+  }
+
 }
