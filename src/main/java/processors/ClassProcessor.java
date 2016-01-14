@@ -7,7 +7,6 @@ import java.util.regex.Pattern;
 
 import engine.TestAnalyser;
 import reparator.App;
-import spoon.Launcher;
 import spoon.processing.AbstractManualProcessor;
 import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtCodeElement;
@@ -136,6 +135,8 @@ public class ClassProcessor extends AbstractManualProcessor {
   public void replaceIfStatement(CtCodeElement statement) {
     // Get the condition
     CtIfImpl ifStatement = (CtIfImpl) statement;
+    // Save the initial operator
+    BinaryOperatorKind opSaved = ((CtBinaryOperatorImpl<?>) ifStatement.getCondition()).getKind();
 
     // The operator index (to be reinitialized for each new condition)
     for (int opIndex = 0; opIndex <= TENTATIVES; opIndex++) {
@@ -156,7 +157,8 @@ public class ClassProcessor extends AbstractManualProcessor {
       switch (codeResult) {
         case -1: // regression
         case 0: // no changes
-          restoreModel();
+          // Restore the initial operator
+          ((CtBinaryOperatorImpl<?>) ifStatement.getCondition()).setKind(opSaved);
           // Is there any other operator ? No : go to the next condition if there is
           if (opIndex == TENTATIVES) {
             if (ifStatement.getElseStatement() instanceof CtIfImpl) { // else if (condition)
@@ -172,7 +174,8 @@ public class ClassProcessor extends AbstractManualProcessor {
           }
           break;
         default:
-          restoreModel(); // In case of emergency
+          // In case of emergency : restore the initial operator
+          ((CtBinaryOperatorImpl<?>) ifStatement.getCondition()).setKind(opSaved);
           break;
       }
     }
@@ -195,10 +198,6 @@ public class ClassProcessor extends AbstractManualProcessor {
     // prettyPrint directory created
     App.launcher.setSourceOutputDirectory(savePath);
     App.launcher.prettyprint();
-  }
-
-  public void restoreModel() {
-    // TODO : How to restore the old model ?
   }
 
   /*
