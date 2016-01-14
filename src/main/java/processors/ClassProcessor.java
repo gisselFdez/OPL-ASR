@@ -1,10 +1,15 @@
 package processors;
 
 import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import engine.Comparator;
+import engine.Compiler;
 import engine.TestAnalyser;
 import reparator.App;
 import spoon.Launcher;
@@ -17,6 +22,7 @@ import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.visitor.filter.TypeFilter;
 import spoon.support.reflect.code.CtBinaryOperatorImpl;
 import spoon.support.reflect.code.CtIfImpl;
+import util.ClasspathClassLoader;
 import util.Operators;
 
 public class ClassProcessor extends AbstractManualProcessor {
@@ -24,6 +30,7 @@ public class ClassProcessor extends AbstractManualProcessor {
   private List<String> classesToModify; // list containing classes where we have to change conditional statements
   private File sourcesPath;
   private List<CtClass<?>> allClasses;
+  private HashMap<String,List<String>> initialFailures;
 
   private static final Integer TENTATIVES = 5; // There are 6 comparison operators (0 to 5)
 
@@ -143,13 +150,10 @@ public class ClassProcessor extends AbstractManualProcessor {
       // Replace the operation of the condition
       ((CtBinaryOperatorImpl<?>) ifStatement.getCondition()).setKind(newOp);
 
-      // Rerun the tests
-      TestAnalyser analyser = new TestAnalyser(App.clsLoader);
-      analyser.analyseWhiteBoxTests();
-
+      
       // Compare the results and get the code
       // TODO : call the Comparator
-      Integer codeResult = 1;
+      Integer codeResult = 1; //verifyModification();
 
       switch (codeResult) {
         case -1: // regression
@@ -184,8 +188,7 @@ public class ClassProcessor extends AbstractManualProcessor {
   public void saveModel() {	  
 	  //App.launcher.setSourceOutputDirectory("C:\\Users\\AnaGissel\\Documents\\MASTER\\OPL\\Project3\\prettyPrint");
 	  App.launcher.prettyprint();
-  }
-  
+  }  
  
   public void restoreModel() {
     // TODO : How to restore the old model ?
@@ -225,4 +228,54 @@ public class ClassProcessor extends AbstractManualProcessor {
   private Boolean isACondition(CtCodeElement codeElement) {
     return (codeElement instanceof CtIfImpl);
   }
+  
+  /*
+   * **********************************************************************************************
+   ****************************************** UTIL METHODS ****************************************
+   **********************************************************************************************/
+  /**
+   * Verifies if the current modification fixed a bug.
+   * @return the comparison result :
+	 * <table>
+	 * <tr> 
+	 *   <td><code>0</code></td>
+	 *   <td>No changes</td>
+	 * </tr>
+	 * <tr> 
+   *   <td><code>1</code></td>
+   *   <td>Repaired tests</td>
+   * </tr>
+   * <tr> 
+   *   <td><code>-1</code></td>
+   *   <td>Regression</td>
+   * </tr>
+	 * </table>
+   */
+  private int verifyModification(){
+	  //save the actual model
+	  saveModel();
+	  String pathModification="";
+	  
+	  //build modified code
+      Compiler compiler = new Compiler();                        
+      HashSet<URL> classLoaderUrls = compiler.compileProject(pathModification);
+      
+      //Create classpath
+      ClasspathClassLoader clsLoaderTmp = new ClasspathClassLoader(classLoaderUrls.toArray(new URL[0]));
+      
+      //Analyse tests  
+      TestAnalyser analyser = new TestAnalyser(clsLoaderTmp);
+      analyser.analyseWhiteBoxTests(); 
+      
+      //Compare results
+      Comparator comparator = new Comparator();
+      HashMap<String,List<String>> newFailures = analyser.getTestClassFailed();
+      int result = comparator.compareResults(initialFailures, newFailures);
+      
+      if(result ==1)
+    	  initialFailures = newFailures;
+      
+      return result;
+  }
+  
 }
