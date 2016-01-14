@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 
 import engine.TestAnalyser;
 import reparator.App;
+import spoon.Launcher;
 import spoon.processing.AbstractManualProcessor;
 import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtCodeElement;
@@ -50,7 +51,7 @@ public class ClassProcessor extends AbstractManualProcessor {
     if (this.allClasses.isEmpty()) {
       System.out.println(">> Any classes found.");
     }
-
+        
     // Run test for each class
     // this.allClasses.stream().forEach(c -> runTest(c));
     // Run analyze on the sources
@@ -84,7 +85,7 @@ public class ClassProcessor extends AbstractManualProcessor {
 
       // Get the good CtClass
       for (CtClass<?> cls : this.allClasses) {
-        if (cls.getSimpleName().equals(classname)) {
+        if (cls.getQualifiedName().equals(classname)) {
           System.out.println(">> runAnalyze() found the class " + classname);
           analyzeClass(cls);
         }
@@ -180,10 +181,12 @@ public class ClassProcessor extends AbstractManualProcessor {
    ****************************************** SAVE METHODS ****************************************
    **********************************************************************************************/
 
-  public void saveModel() {
-    App.launcher.prettyprint();
+  public void saveModel() {	  
+	  //App.launcher.setSourceOutputDirectory("C:\\Users\\AnaGissel\\Documents\\MASTER\\OPL\\Project3\\prettyPrint");
+	  App.launcher.prettyprint();
   }
-
+  
+ 
   public void restoreModel() {
     // TODO : How to restore the old model ?
   }
