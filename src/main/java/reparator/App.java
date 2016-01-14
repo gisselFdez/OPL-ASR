@@ -87,7 +87,7 @@ public class App {
                             // Call the spoon processor
                             System.out.println(">> Launch the ClassProcessor.");
                             //String spoonPath= listFile[i].getPath().replace("\\src", "");
-                            launcher.addProcessor(new ClassProcessor(new File(listFile[i].getPath()), classes));
+                            launcher.addProcessor(new ClassProcessor(new File(listFile[i].getPath()), classes, failures));
                             launcher.run(new String[] {"-i", listFile[i].getPath(), "-x"});
                 		}                		
                         break;

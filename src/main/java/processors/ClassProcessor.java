@@ -31,6 +31,7 @@ public class ClassProcessor extends AbstractManualProcessor {
   private File sourcesPath;
   private List<CtClass<?>> allClasses;
   private HashMap<String,List<String>> initialFailures;
+  String savePath;
 
   private static final Integer TENTATIVES = 5; // There are 6 comparison operators (0 to 5)
 
@@ -39,11 +40,12 @@ public class ClassProcessor extends AbstractManualProcessor {
    * @param classesToModify the list of classes where conditional statements have to be changed
    * @param sourcesPath the sources path
    */
-  public ClassProcessor(File sourcesPath, List<String> classesToModify) {
+  public ClassProcessor(File sourcesPath, List<String> classesToModify,HashMap<String,List<String>> initialFailures) {
     super();
     this.classesToModify = classesToModify;
     this.sourcesPath = sourcesPath;
     this.allClasses = new ArrayList<CtClass<?>>();
+    this.initialFailures = initialFailures;
   }
 
   public void setAllClasses(List<CtClass<?>> allClasses) {
@@ -70,10 +72,12 @@ public class ClassProcessor extends AbstractManualProcessor {
    * @param className the test classname
    */
   private void runTest(CtClass<?> className) {
-    /*TestAnalyser test = new TestAnalyser();
-    test.runTest(AppTest.class);
-
-    System.out.println(className.getSimpleName().toString());*/
+    /*
+     * TestAnalyser test = new TestAnalyser();
+     * test.runTest(AppTest.class);
+     * 
+     * System.out.println(className.getSimpleName().toString());
+     */
   }
 
   /*
@@ -185,11 +189,20 @@ public class ClassProcessor extends AbstractManualProcessor {
    ****************************************** SAVE METHODS ****************************************
    **********************************************************************************************/
 
-  public void saveModel() {	  
-	  //App.launcher.setSourceOutputDirectory("C:\\Users\\AnaGissel\\Documents\\MASTER\\OPL\\Project3\\prettyPrint");
-	  App.launcher.prettyprint();
-  }  
- 
+  public void saveModel() {
+    savePath = this.sourcesPath.getPath() + "\\prettyPrint";
+    File savePathFile = new File(savePath);
+    if (!(savePathFile.exists())) {
+      if (!savePathFile.mkdir()) {
+        System.out.println(">> !!! Error while creating the save directory. ");
+        return;
+      }
+    }
+    // prettyPrint directory created
+    App.launcher.setSourceOutputDirectory(savePath);
+    App.launcher.prettyprint();
+  }
+
   public void restoreModel() {
     // TODO : How to restore the old model ?
   }
@@ -254,11 +267,10 @@ public class ClassProcessor extends AbstractManualProcessor {
   private int verifyModification(){
 	  //save the actual model
 	  saveModel();
-	  String pathModification="";
 	  
 	  //build modified code
       Compiler compiler = new Compiler();                        
-      HashSet<URL> classLoaderUrls = compiler.compileProject(pathModification);
+      HashSet<URL> classLoaderUrls = compiler.compileProject(savePath);
       
       //Create classpath
       ClasspathClassLoader clsLoaderTmp = new ClasspathClassLoader(classLoaderUrls.toArray(new URL[0]));
