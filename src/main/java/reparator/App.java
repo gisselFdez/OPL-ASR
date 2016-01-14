@@ -30,7 +30,7 @@ public class App {
   public static final String CHECKSUM_06_PATH = "C:\\Users\\AnaGissel\\Documents\\MASTER\\OPL\\Project3\\IntroClassJava\\dataset\\checksum\\6\\003";
   public static final List<String> STATIC_CLASSES_LIST = initStaticList();
   public static Launcher launcher = new Launcher();
-
+  public static ClasspathClassLoader clsLoader;
 
 
 	public static void main(String[] args) {
@@ -65,7 +65,7 @@ public class App {
                         Compiler compiler = new Compiler();                        
                         HashSet<URL> classLoaderUrls = compiler.compileProject(listFile[i].getPath());
                         //Create classpath
-                        ClasspathClassLoader clsLoader = new ClasspathClassLoader(classLoaderUrls.toArray(new URL[0]));
+                        clsLoader = new ClasspathClassLoader(classLoaderUrls.toArray(new URL[0]));
                         
                         //Analyse tests                       
                         TestAnalyser analyser = new TestAnalyser(clsLoader);

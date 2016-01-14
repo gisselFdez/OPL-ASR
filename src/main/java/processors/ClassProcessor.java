@@ -4,24 +4,27 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
+
 import engine.TestAnalyser;
 import reparator.App;
-import reparator.AppTest;
 import spoon.processing.AbstractManualProcessor;
+import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtCodeElement;
 import spoon.reflect.code.CtStatement;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.visitor.filter.TypeFilter;
+import spoon.support.reflect.code.CtBinaryOperatorImpl;
 import spoon.support.reflect.code.CtIfImpl;
 import util.Operators;
 
-public class ClassProcessor extends AbstractManualProcessor{
+public class ClassProcessor extends AbstractManualProcessor {
 
-	
   private List<String> classesToModify; // list containing classes where we have to change conditional statements
   private File sourcesPath;
   private List<CtClass<?>> allClasses;
+
+  private static final Integer TENTATIVES = 5; // There are 6 comparison operators (0 to 5)
 
   /**
    * Constructor of the ClassProcessor
@@ -127,20 +130,64 @@ public class ClassProcessor extends AbstractManualProcessor{
    * Replace a if statement modifying the comparison operator
    * @param ifStatement the statement to change
    */
-  public void replaceIfStatement(CtCodeElement ifStatement) {
-    
+  public void replaceIfStatement(CtCodeElement statement) {
+    // Get the condition
+    CtIfImpl ifStatement = (CtIfImpl) statement;
+
+    // The operator index (to be reinitialized for each new condition)
+    for (int opIndex = 0; opIndex <= TENTATIVES; opIndex++) {
+      // Get the new operator
+      BinaryOperatorKind newOp = Operators.getBinaryOp(Operators.getByIndex(opIndex));
+
+      // Replace the operation of the condition
+      ((CtBinaryOperatorImpl<?>) ifStatement.getCondition()).setKind(newOp);
+
+      // Rerun the tests
+      TestAnalyser analyser = new TestAnalyser(App.clsLoader);
+      analyser.analyseWhiteBoxTests();
+
+      // Compare the results and get the code
+      // TODO : call the Comparator
+      Integer codeResult = 1;
+
+      switch (codeResult) {
+        case -1: // regression
+        case 0: // no changes
+          restoreModel();
+          // Is there any other operator ? No : go to the next condition if there is
+          if (opIndex == TENTATIVES) {
+            if (ifStatement.getElseStatement() instanceof CtIfImpl) { // else if (condition)
+              replaceIfStatement(ifStatement.getElseStatement());
+            }
+          } // Yes : go to the next operator
+          break;
+        case 1: // repaired tests
+          saveModel();
+          // Go to the next condition
+          if (ifStatement.getElseStatement() instanceof CtIfImpl) { // else if (condition)
+            replaceIfStatement(ifStatement.getElseStatement());
+          }
+          break;
+        default:
+          restoreModel(); // In case of emergency
+          break;
+      }
+    }
   }
-  
 
   /*
    * **********************************************************************************************
    ****************************************** SAVE METHODS ****************************************
    **********************************************************************************************/
-  
+
   public void saveModel() {
     App.launcher.prettyprint();
   }
-  
+
+  public void restoreModel() {
+    // TODO : How to restore the old model ?
+  }
+
   /*
    * **********************************************************************************************
    * *************************************** CHECK METHODS ****************************************
