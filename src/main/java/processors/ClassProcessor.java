@@ -63,10 +63,12 @@ public class ClassProcessor extends AbstractManualProcessor {
    * @param className the test classname
    */
   private void runTest(CtClass<?> className) {
-    /*TestAnalyser test = new TestAnalyser();
-    test.runTest(AppTest.class);
-
-    System.out.println(className.getSimpleName().toString());*/
+    /*
+     * TestAnalyser test = new TestAnalyser();
+     * test.runTest(AppTest.class);
+     * 
+     * System.out.println(className.getSimpleName().toString());
+     */
   }
 
   /*
@@ -181,12 +183,20 @@ public class ClassProcessor extends AbstractManualProcessor {
    ****************************************** SAVE METHODS ****************************************
    **********************************************************************************************/
 
-  public void saveModel() {	  
-	  //App.launcher.setSourceOutputDirectory("C:\\Users\\AnaGissel\\Documents\\MASTER\\OPL\\Project3\\prettyPrint");
-	  App.launcher.prettyprint();
+  public void saveModel() {
+    String savePath = this.sourcesPath.getPath() + "\\prettyPrint";
+    File savePathFile = new File(savePath);
+    if (!(savePathFile.exists())) {
+      if (!savePathFile.mkdir()) {
+        System.out.println(">> !!! Error while creating the save directory. ");
+        return;
+      }
+    }
+    // prettyPrint directory created
+    App.launcher.setSourceOutputDirectory(savePath);
+    App.launcher.prettyprint();
   }
-  
- 
+
   public void restoreModel() {
     // TODO : How to restore the old model ?
   }
