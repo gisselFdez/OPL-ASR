@@ -23,7 +23,8 @@ import spoon.Launcher;
 
 public class App {
 
-  public static final String SOURCES_PATH = "C:\\Users\\Pauline\\Documents\\M2IAGL\\OPL\\OPL-ASR";
+  //public static final String SOURCES_PATH = "C:\\Users\\Pauline\\Documents\\M2IAGL\\OPL\\OPL-ASR";
+	public static final String SOURCES_PATH = "C:\\Users\\AnaGissel\\Documents\\MASTER\\OPL\\Project3\\OPL-ASR";
   // public static final String SOURCES_PATH = "C:\\Users\\Pauline\\Documents\\M2IAGL\\OPL\\IntroClassJava\\dataset\\checksum\\6\\003";
   // public static final String SOURCES_PATH = "C:\\Users\\AnaGissel\\Documents\\MASTER\\OPL\\Project3\\IntroClassJava\\dataset";
   public static final String CHECKSUM_06_PATH = "C:\\Users\\AnaGissel\\Documents\\MASTER\\OPL\\Project3\\IntroClassJava\\dataset\\checksum\\6\\003";
@@ -42,7 +43,7 @@ public class App {
 		
 		//To call EVERY project on path		
 		App reparator = new App();
-		reparator.getAllProjects(new File(SOURCES_PATH));
+		reparator.getAllProjects(new File(CHECKSUM_06_PATH));
 	}
 
 	
@@ -72,15 +73,7 @@ public class App {
                         
                         System.out.println("---------ANALYSIS RESULTS------");
                         List<String> classes = analyser.getNoTestClasses();
-                        /*for(String cls:classes){
-                        	System.out.println("cls: "+cls);
-                        }*/
                         HashMap<String,List<String>> failures = analyser.getTestClassFailed();
-                        /*Iterator it = failures.entrySet().iterator();
-                        while (it.hasNext()) {
-                        	Map.Entry e = (Map.Entry)it.next();
-                        	System.out.println(e.getKey() + " " + e.getValue());
-                        }*/
                         
                         // Call the spoon processor
                         System.out.println(">> Launch the ClassProcessor.");
