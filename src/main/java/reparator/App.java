@@ -13,6 +13,7 @@ import java.util.Map;
 import processors.ClassProcessor;
 import spoon.Launcher;
 import util.ClasspathClassLoader;
+import util.Summary;
 import engine.Comparator;
 import engine.Compiler;
 import engine.TestAnalyser;
@@ -43,7 +44,9 @@ public class App {
 		
 		//To call EVERY project on path		
 		App reparator = new App();
-		reparator.getAllProjects(new File(CHECKSUM_06_PATH));
+		int failures=reparator.getAllProjects(new File(CHECKSUM_06_PATH));
+		//Summary
+		printSummary(failures);
 	}
 
 	
@@ -51,7 +54,8 @@ public class App {
 	 * Launch the spoon processor for every project found in the sourcesPath
 	 * @param sourcesPath
 	 */
-	private void getAllProjects(File sourcesPath){			
+	private int getAllProjects(File sourcesPath){	
+		int testFailures = 0;
 		File listFile[] = sourcesPath.listFiles();
         if (listFile != null) {
             for (int i = 0; i < listFile.length; i++) {
@@ -60,21 +64,21 @@ public class App {
                 		getAllProjects(listFile[i]);
                 	else {
                 		//FOR EACH PROJECT
-                        System.out.println("File:"+listFile[i].getPath());
+                        //System.out.println("File:"+listFile[i].getPath());
                         //build project
                         Compiler compiler = new Compiler();                        
                         HashSet<URL> classLoaderUrls = compiler.compileProject(listFile[i].getPath());
                         //Create classpath
                         clsLoader = new ClasspathClassLoader(classLoaderUrls.toArray(new URL[0]));
                         
-                        //Analyse tests                       
+                        //Analyse tests  
+                        System.out.println(">> Launch the Test Analysis.");
                         TestAnalyser analyser = new TestAnalyser(clsLoader);
-                        analyser.analyseWhiteBoxTests();
-                        
-                        System.out.println("---------ANALYSIS RESULTS------");
+                        analyser.analyseWhiteBoxTests();                        
+                        //System.out.println("	Results:");
                         List<String> classes = analyser.getNoTestClasses();
                         HashMap<String,List<String>> failures = analyser.getTestClassFailed();
-                        
+                        testFailures = testFailures+analyser.getTestFailures();
                         // Call the spoon processor
                         System.out.println(">> Launch the ClassProcessor.");
                         launcher.addProcessor(new ClassProcessor(new File(SOURCES_PATH), STATIC_CLASSES_LIST));
@@ -82,17 +86,17 @@ public class App {
                         break;
                     }                	
                 } 
-            }
-            //return HashMap<ClassName,List<methodsName>>
-            
-            //calling spoon processor
-            /*final Launcher spoon = new Launcher();
-			spoon.addProcessor(new ClassProcessor());
-			spoon.run(new String[]{"-i",listFile[i].getPath(),"-x"});*/
-          }
-        }
+            }       
+         }
+        return testFailures;        
+	}
   
-
+	private static void printSummary(int failures){		
+        System.out.println("\n-----------SUMMARY-----------");
+        System.out.println("Initial failed tests: "+failures);
+        System.out.println("Repaired tests: "+Summary.getRepairedTests());
+	}
+	
   /* ******************************************* BUILDS ******************************************* */
 
   private static List<String> initStaticList() {

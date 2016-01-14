@@ -21,6 +21,16 @@ public class TestAnalyser {
   private HashMap<String, List<String>> testClassFailed = new HashMap<String, List<String>>();
   private List<String> noTestClasses = new ArrayList<String>();
   public static final String JUNIT_ANNOTATION = "org.junit.Test";
+  private int testFailures;
+  
+  public TestAnalyser(ClasspathClassLoader clsLoader) {
+    this.clsLoader = clsLoader;
+    this.testFailures = 0;
+  }
+  
+  public int getTestFailures() {
+	return testFailures;
+  }
 
   public List<String> getNoTestClasses() {
     return noTestClasses;
@@ -28,10 +38,6 @@ public class TestAnalyser {
 
   public HashMap<String, List<String>> getTestClassFailed() {
     return testClassFailed;
-  }
-
-  public TestAnalyser(ClasspathClassLoader clsLoader) {
-    this.clsLoader = clsLoader;
   }
 
   /**
@@ -62,15 +68,17 @@ public class TestAnalyser {
           List<Failure> failures = result.getFailures();
 
           if (failures.size() != 0) {
-            System.out.println("Test failed: " + m.getName());
-            testsFailed.add(m.getName());
+            //System.out.println("Test failed: " + m.getName());
+            testsFailed.add(m.getName());           
           }
         }
     }
 
     // if any test of the class failed
-    if (testsFailed.size() != 0)
+    if (testsFailed.size() != 0){
       testClassFailed.put(className.getName(), testsFailed);
+      testFailures =testFailures+testsFailed.size();
+    }
   }
 
   /**
@@ -112,7 +120,7 @@ public class TestAnalyser {
     else
       // linux
       name = file.replace(path.substring(1), "").replace("/", ".").replace(" ", "").replace(".class", "");
-    System.out.println(name);
+    //System.out.println(name);
     return name;
   }
 }
