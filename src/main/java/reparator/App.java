@@ -25,10 +25,11 @@ import spoon.Launcher;
 public class App {
 
   //public static final String SOURCES_PATH = "C:\\Users\\Pauline\\Documents\\M2IAGL\\OPL\\OPL-ASR";
-	public static final String SOURCES_PATH = "C:\\Users\\AnaGissel\\Documents\\MASTER\\OPL\\Project3\\OPL-ASR";
+  //public static final String SOURCES_PATH = "C:\\Users\\AnaGissel\\Documents\\MASTER\\OPL\\Project3\\OPL-ASR";
   // public static final String SOURCES_PATH = "C:\\Users\\Pauline\\Documents\\M2IAGL\\OPL\\IntroClassJava\\dataset\\checksum\\6\\003";
-  // public static final String SOURCES_PATH = "C:\\Users\\AnaGissel\\Documents\\MASTER\\OPL\\Project3\\IntroClassJava\\dataset";
+  //public static final String SOURCES_PATH = "C:\\Users\\AnaGissel\\Documents\\MASTER\\OPL\\Project3\\IntroClassJava\\dataset";
   public static final String CHECKSUM_06_PATH = "C:\\Users\\AnaGissel\\Documents\\MASTER\\OPL\\Project3\\IntroClassJava\\dataset\\checksum\\1\\003";
+  public static final String SOURCES_PRINT = "C:\\Users\\AnaGissel\\Documents\\MASTER\\OPL\\Project3\\prettyPrint";
   public static final List<String> STATIC_CLASSES_LIST = initStaticList();
   public static Launcher launcher = new Launcher();
   public static ClasspathClassLoader clsLoader;
@@ -63,31 +64,37 @@ public class App {
                 	if(!listFile[i].toString().contains("src"))
                 		getAllProjects(listFile[i]);
                 	else {
-                		//FOR EACH PROJECT
-                        //System.out.println("File:"+listFile[i].getPath());
-                        //build project
-                        Compiler compiler = new Compiler();                        
-                        HashSet<URL> classLoaderUrls = compiler.compileProject(listFile[i].getPath());
-                        //Create classpath
-                        clsLoader = new ClasspathClassLoader(classLoaderUrls.toArray(new URL[0]));
-                        
-                        //Analyse tests  
-                        System.out.println(">> Launch the Test Analysis.");
-                        TestAnalyser analyser = new TestAnalyser(clsLoader);
-                        analyser.analyseWhiteBoxTests();                        
-                        //System.out.println("	Results:");
-                        List<String> classes = analyser.getNoTestClasses();
-                        HashMap<String,List<String>> failures = analyser.getTestClassFailed();
-                        testFailures = testFailures+analyser.getTestFailures();
-                        // Call the spoon processor
-                        System.out.println(">> Launch the ClassProcessor.");
-                        launcher.addProcessor(new ClassProcessor(new File(SOURCES_PATH), STATIC_CLASSES_LIST));
-                        launcher.run(new String[] {"-i", listFile[i].getPath(), "-x"});
+                		if(listFile[i].toString().contains("spooned"))
+                			break;
+                		else{
+                			//FOR EACH PROJECT
+                            System.out.println("File:"+listFile[i].getPath());
+                            //build project
+                            Compiler compiler = new Compiler();                        
+                            HashSet<URL> classLoaderUrls = compiler.compileProject(listFile[i].getPath());//listFile[i].getPath()
+                            //Create classpath
+                            clsLoader = new ClasspathClassLoader(classLoaderUrls.toArray(new URL[0]));
+                            
+                            //Analyse tests  
+                            System.out.println(">> Launch the Test Analysis.");
+                            TestAnalyser analyser = new TestAnalyser(clsLoader);
+                            analyser.analyseWhiteBoxTests();                        
+                            //System.out.println("	Results:");
+                            List<String> classes = analyser.getNoTestClasses();
+                            HashMap<String,List<String>> failures = analyser.getTestClassFailed();
+                            testFailures = testFailures+analyser.getTestFailures();
+                            
+                            // Call the spoon processor
+                            System.out.println(">> Launch the ClassProcessor.");
+                            //String spoonPath= listFile[i].getPath().replace("\\src", "");
+                            launcher.addProcessor(new ClassProcessor(new File(listFile[i].getPath()), classes));
+                            launcher.run(new String[] {"-i", listFile[i].getPath(), "-x"});
+                		}                		
                         break;
                     }                	
                 } 
-            }       
-         }
+            }             
+         }   
         return testFailures;        
 	}
   
