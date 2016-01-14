@@ -16,8 +16,22 @@ import util.Summary;
 public class Comparator {
 
 	/**
-	 * Returns 0 : No changes, 1 : Repaired Test, -1 : Regression
-	 * @return
+	 * Compares two lists of tests failures and determines if there are repaired tests, regressions or no changes.
+	 * @return the comparison result :
+	 * <table>
+	 * <tr> 
+	 *   <td><code>0</code></td>
+	 *   <td>No changes</td>
+	 * </tr>
+	 * <tr> 
+   *   <td><code>1</code></td>
+   *   <td>Repaired tests</td>
+   * </tr>
+   * <tr> 
+   *   <td><code>-1</code></td>
+   *   <td>Regression</td>
+   * </tr>
+	 * </table>
 	 */
 	public int compareResults(HashMap<String, List<String>> initialFailures, HashMap<String, List<String>> newFailures){
 		Boolean anyTestRepaired = false;
