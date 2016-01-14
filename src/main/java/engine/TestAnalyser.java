@@ -85,7 +85,7 @@ public class TestAnalyser {
           runAllWhiteBoxTestClasses(listFile[i]);
         else if (listFile[i].toString().contains(".class") && listFile[i].toString().contains("Whitebox")) {
           runTest(this.clsLoader.findOrLoadClass(getNameClass(actualPath, listFile[i].toString())));
-        } else
+        } else if(listFile[i].toString().contains(".class"))
           isNotTestClass(this.clsLoader.findOrLoadClass(getNameClass(actualPath, listFile[i].toString())));
       }
     }
