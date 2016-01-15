@@ -91,10 +91,10 @@ public class TestAnalyser {
       for (int i = 0; i < listFile.length; i++) {
         if (listFile[i].isDirectory())
           runAllWhiteBoxTestClasses(listFile[i]);
-        else if (listFile[i].toString().contains(".class") && listFile[i].toString().contains("Whitebox")) {
+        else if (listFile[i].toString().contains(".class") && !listFile[i].toString().contains("Blackbox")) {
           runTest(this.clsLoader.findOrLoadClass(getNameClass(actualPath, listFile[i].toString())));
-        } else if(listFile[i].toString().contains(".class"))
           isNotTestClass(this.clsLoader.findOrLoadClass(getNameClass(actualPath, listFile[i].toString())));
+        }
       }
     }
   }
