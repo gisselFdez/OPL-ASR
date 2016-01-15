@@ -45,6 +45,7 @@ public class ClassProcessor extends AbstractManualProcessor {
     this.sourcesPath = sourcesPath;
     this.allClasses = new ArrayList<CtClass<?>>();
     this.initialFailures = initialFailures;
+    this.savePath = getPrettyPath();
   }
 
   public void setAllClasses(List<CtClass<?>> allClasses) {
@@ -95,6 +96,7 @@ public class ClassProcessor extends AbstractManualProcessor {
 
       // Get the good CtClass
       for (CtClass<?> cls : this.allClasses) {
+    	  //System.out.println( cls.getQualifiedName() +" || "+classname);
         if (cls.getQualifiedName().equals(classname)) {
           System.out.println(">> runAnalyze() found the class " + classname);
           analyzeClass(cls);
@@ -154,11 +156,11 @@ public class ClassProcessor extends AbstractManualProcessor {
 
       // Replace the operation of the condition
       ((CtBinaryOperatorImpl<?>) ifStatement.getCondition()).setKind(newOp);
-
+      System.out.println("operator: " +newOp);
       
       // Compare the results and get the code
       // TODO : call the Comparator
-      Integer codeResult = 1; //verifyModification();
+      Integer codeResult = verifyModification();
 
       switch (codeResult) {
         case -1: // regression
@@ -193,7 +195,6 @@ public class ClassProcessor extends AbstractManualProcessor {
    **********************************************************************************************/
 
   public void saveModel() {
-    savePath = this.sourcesPath.getPath() + "\\prettyPrint";
     File savePathFile = new File(savePath);
     if (!(savePathFile.exists())) {
       if (!savePathFile.mkdir()) {
@@ -264,6 +265,8 @@ public class ClassProcessor extends AbstractManualProcessor {
 	 * </table>
    */
   private int verifyModification(){
+	  int result=0;
+	  
 	  //save the actual model
 	  saveModel();
 	  
@@ -271,22 +274,29 @@ public class ClassProcessor extends AbstractManualProcessor {
       Compiler compiler = new Compiler();                        
       HashSet<URL> classLoaderUrls = compiler.compileProject(savePath);
       
-      //Create classpath
-      ClasspathClassLoader clsLoaderTmp = new ClasspathClassLoader(classLoaderUrls.toArray(new URL[0]));
-      
-      //Analyse tests  
-      TestAnalyser analyser = new TestAnalyser(clsLoaderTmp);
-      analyser.analyseWhiteBoxTests(); 
-      
-      //Compare results
-      Comparator comparator = new Comparator();
-      HashMap<String,List<String>> newFailures = analyser.getTestClassFailed();
-      int result = comparator.compareResults(initialFailures, newFailures);
-      
-      if(result ==1)
-    	  initialFailures = newFailures;
-      
+      if(classLoaderUrls!=null){
+    	//Create classpath
+          ClasspathClassLoader clsLoaderTmp = new ClasspathClassLoader(classLoaderUrls.toArray(new URL[0]));
+          
+          //Analyse tests  
+          TestAnalyser analyser = new TestAnalyser(clsLoaderTmp);
+          analyser.analyseWhiteBoxTests(); 
+          
+          //Compare results
+          Comparator comparator = new Comparator();
+          HashMap<String,List<String>> newFailures = analyser.getTestClassFailed();
+          result = comparator.compareResults(initialFailures, newFailures);
+          
+          if(result ==1)
+        	  initialFailures = newFailures;
+      }
+      else{
+    	  result = -1;
+      } 
       return result;
   }
   
+  private String getPrettyPath(){
+	  return this.sourcesPath.getPath().replace("\\src", "").replace("/src", "")+ "\\prettyPrint";
+  }
 }
