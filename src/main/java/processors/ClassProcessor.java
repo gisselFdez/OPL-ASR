@@ -23,6 +23,7 @@ import spoon.support.reflect.code.CtBinaryOperatorImpl;
 import spoon.support.reflect.code.CtIfImpl;
 import util.ClasspathClassLoader;
 import util.Operators;
+import util.Summary;
 
 public class ClassProcessor extends AbstractManualProcessor {
 
@@ -146,8 +147,15 @@ public class ClassProcessor extends AbstractManualProcessor {
   public void replaceIfStatement(CtCodeElement statement) {
     // Get the condition
     CtIfImpl ifStatement = (CtIfImpl) statement;
-    // Save the initial operator
-    BinaryOperatorKind opSaved = ((CtBinaryOperatorImpl<?>) ifStatement.getCondition()).getKind();
+    String initialStatement = statement.toString();
+    // Save the initial operator    
+    BinaryOperatorKind opSaved;
+    try{
+    	opSaved = ((CtBinaryOperatorImpl<?>) ifStatement.getCondition()).getKind();
+    }
+    catch(ClassCastException e){
+    	return;
+    }
 
     // The operator index (to be reinitialized for each new condition)
     for (int opIndex = 0; opIndex <= TENTATIVES; opIndex++) {
@@ -156,7 +164,7 @@ public class ClassProcessor extends AbstractManualProcessor {
 
       // Replace the operation of the condition
       ((CtBinaryOperatorImpl<?>) ifStatement.getCondition()).setKind(newOp);
-      System.out.println("operator: " +newOp);
+      //System.out.println("operator: " +newOp);
       
       // Compare the results and get the code
       // TODO : call the Comparator
@@ -176,6 +184,10 @@ public class ClassProcessor extends AbstractManualProcessor {
           break;
         case 1: // repaired tests
           saveModel();
+          Summary.writeToOutputFile(">>>>>> BUG FIXED <<<<<<<");
+          Summary.writeToOutputFile(initialStatement);
+          Summary.writeToOutputFile("\n       REPLACED BY: \n");
+          Summary.writeToOutputFile(ifStatement.toString()+"\n");
           // Go to the next condition
           if (ifStatement.getElseStatement() instanceof CtIfImpl) { // else if (condition)
             replaceIfStatement(ifStatement.getElseStatement());
@@ -297,6 +309,6 @@ public class ClassProcessor extends AbstractManualProcessor {
   }
   
   private String getPrettyPath(){
-	  return this.sourcesPath.getPath().replace("\\src", "").replace("/src", "")+ "\\prettyPrint";
+	  return this.sourcesPath.getPath().replace("\\src", "").replace("/src", "")+ "\\repairedCode";
   }
 }
